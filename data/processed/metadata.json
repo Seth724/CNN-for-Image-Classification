@@ -1,0 +1,45 @@
+{
+  "dataset": "Fashion-MNIST",
+  "source": "Zalando Research Fashion-MNIST Kaggle CSVs",
+  "seed": 42,
+  "image_shape": [
+    28,
+    28,
+    1
+  ],
+  "total_samples": 70000,
+  "num_classes": 10,
+  "class_names": [
+    "T-shirt/top",
+    "Trouser",
+    "Pullover",
+    "Dress",
+    "Coat",
+    "Sandal",
+    "Shirt",
+    "Sneaker",
+    "Bag",
+    "Ankle boot"
+  ],
+  "splits": {
+    "train": {
+      "count": 49000,
+      "ratio": 0.7,
+      "per_class": 4900
+    },
+    "validation": {
+      "count": 10500,
+      "ratio": 0.15,
+      "per_class": 1050
+    },
+    "test": {
+      "count": 10500,
+      "ratio": 0.15,
+      "per_class": 1050
+    }
+  },
+  "raw_file_sha256": {
+    "fashion-mnist_train.csv": "6e94982a04469e61eb7dc493ce1f606f8ded0a0b8bae7cb4809bf8701fd94b7f",
+    "fashion-mnist_test.csv": "85ef50a3b4a5b5feead1e7aedae5aade5a2ed5ff59ac79d6525d6282a1a2bc01"
+  }
+}
