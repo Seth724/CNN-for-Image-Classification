@@ -27,7 +27,8 @@ def build_model_b(input_shape=(28, 28, 1), num_classes=10):
     """Return the uncompiled Model B."""
     inputs = keras.Input(shape=input_shape)
 
-    # First layer stays a standard conv: with 1 input channel a depthwise split saves nothing.
+    # First layer stays a standard conv: with 1 input channel a separable conv would learn a single
+    # 3x3 filter and output 32 scaled copies of it. The standard conv costs only 320 params anyway.
     x = layers.Conv2D(32, 3, padding="same", activation="relu", name="conv1")(inputs)
     x = layers.MaxPooling2D(2, name="pool1")(x)                      # 28x28 -> 14x14
 
