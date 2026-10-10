@@ -1,10 +1,3 @@
-"""Report figures shared by all models. Every function saves a PNG and closes the figure.
-
-Typical layout (one folder per training stage, plus a comparison folder):
-    results/figures/transfer/    learning curves, confusion matrix, per-class metrics
-    results/figures/finetuned/   same set for the fine-tuned model
-    results/figures/comparison/  transfer vs fine-tuned, side by side
-"""
 import json
 import os
 
