@@ -5,3 +5,8 @@ venv/
 .env
 data/raw/*
 !data/raw/.gitkeep
+*.keras
+*.h5
+*.tflite
+outputs/
+.ipynb_checkpoints/
