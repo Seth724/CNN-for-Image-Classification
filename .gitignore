@@ -5,3 +5,9 @@ venv/
 .env
 data/raw/*
 !data/raw/.gitkeep
+
+# trained weights are large; only metrics and figures are committed
+results/models/
+*.keras
+*.h5
+*.tflite
