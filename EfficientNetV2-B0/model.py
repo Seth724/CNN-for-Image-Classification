@@ -10,6 +10,11 @@ from src.data_loader import make_tf_datasets
 from src.evaluation import EpochTimer, collect_metrics, predict_labels
 from src import plots
 
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+OUT_DIR = ROOT / "results" / "efficientnetv2_b0"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+keras.utils.set_random_seed(42)
+
 train_ds, val_ds, test_ds = make_tf_datasets(batch_size=32, sota=True, size=32)
 
 base_model = keras.applications.EfficientNetV2B0(
@@ -44,17 +49,22 @@ history_transfer = model.fit(
     train_ds,
     epochs=epochs,
     validation_data=val_ds,
-    callbacks=[timer],
+    callbacks=[
+        timer,
+        keras.callbacks.ModelCheckpoint(str(OUT_DIR / "transfer_best.keras"),
+                                        monitor="val_loss", save_best_only=True),
+        keras.callbacks.CSVLogger(str(OUT_DIR / "transfer_training.csv")),
+    ],
 )
 
 print("\nPhase 1 metrics on the test set:")
-metrics_transfer = collect_metrics(model, test_ds, timer, num_classes=10, save_path="results/efficientnetv2_b0_transfer_metrics.json")
-model.save("results/efficientnetv2_b0_transfer.keras")  # lets phase 2 be rerun on its own
+metrics_transfer = collect_metrics(model, test_ds, timer, num_classes=10, save_path=str(OUT_DIR / "transfer_metrics.json"))
+model.save(str(OUT_DIR / "transfer.keras"))  # lets phase 2 be rerun on its own
 
-FIG_DIR = "results/figures"
+FIG_DIR = OUT_DIR / "figures"
 class_names = plots.load_class_names()
 y_true, pred_transfer = predict_labels(model, test_ds)
-plots.save_history(history_transfer, "results/efficientnetv2_b0_transfer_history.json")
+plots.save_history(history_transfer, str(OUT_DIR / "transfer_history.json"))
 plots.plot_stage_report(model, test_ds, history_transfer, timer.epoch_times, class_names,
                         f"{FIG_DIR}/transfer", "EfficientNetV2-B0 transfer learning")
 
@@ -90,16 +100,21 @@ history_finetune = model.fit(
     validation_data=val_ds,
     callbacks=[
         ft_timer,
+        keras.callbacks.ModelCheckpoint(str(OUT_DIR / "finetuned_best.keras"),
+                                        monitor="val_loss", save_best_only=True),
+        keras.callbacks.CSVLogger(str(OUT_DIR / "finetuned_training.csv")),
         keras.callbacks.EarlyStopping(monitor="val_loss", patience=4, restore_best_weights=True),
     ],
 )
 
+model.save(str(OUT_DIR / "finetuned.keras"))
+
 print("\nPhase 2 (fine-tuned) metrics on the test set:")
-metrics_finetuned = collect_metrics(model, test_ds, ft_timer, num_classes=10, save_path="results/efficientnetv2_b0_finetuned_metrics.json")
+metrics_finetuned = collect_metrics(model, test_ds, ft_timer, num_classes=10, save_path=str(OUT_DIR / "finetuned_metrics.json"))
 
 # ---------------- Fine tuned model plots ----------------
 _, pred_finetuned = predict_labels(model, test_ds)
-plots.save_history(history_finetune, "results/efficientnetv2_b0_finetuned_history.json")
+plots.save_history(history_finetune, str(OUT_DIR / "finetuned_history.json"))
 plots.plot_stage_report(model, test_ds, history_finetune, ft_timer.epoch_times, class_names,
                         f"{FIG_DIR}/finetuned", "EfficientNetV2-B0 fine-tuning")
 
