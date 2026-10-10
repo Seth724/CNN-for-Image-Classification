@@ -1,8 +1,3 @@
-"""Model-agnostic metrics shared by the custom CNN and the SOTA model.
-
-Keeping this outside the model scripts guarantees both models are measured
-with exactly the same code, which is what makes the comparison fair.
-"""
 import json
 import os
 import tempfile

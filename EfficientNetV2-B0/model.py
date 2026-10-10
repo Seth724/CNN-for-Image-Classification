@@ -10,22 +10,19 @@ from src.data_loader import make_tf_datasets
 from src.evaluation import EpochTimer, collect_metrics, predict_labels
 from src import plots
 
-train_ds, val_ds, test_ds = make_tf_datasets(batch_size=128, sota=True, size=32)
+train_ds, val_ds, test_ds = make_tf_datasets(batch_size=32, sota=True, size=32)
 
 base_model = keras.applications.EfficientNetV2B0(
     include_top=False,
     weights='imagenet',
     input_shape=(32, 32, 3),
-    pooling='avg'
 )
 
 base_model.trainable = False # Freeze the base model
 
 inputs = keras.Input(shape=(32, 32, 3))
-scale_layer = keras.layers.Rescaling(scale=1 / 127.5, offset=-1)
-x = scale_layer(inputs)
 
-x = base_model(x, training=False)
+x = base_model(inputs, training=False)
 x = keras.layers.GlobalAveragePooling2D()(x)
 x = keras.layers.Dropout(0.2)(x)
 outputs = keras.layers.Dense(10, activation='softmax')(x)
@@ -64,9 +61,9 @@ plots.plot_stage_report(model, test_ds, history_transfer, timer.epoch_times, cla
 
 
 # ---------------- Phase 2: fine-tuning (last part of backbone unfrozen) ----------------
-UNFREEZE_FRACTION = 0.25   # last 20-30% of backbone layers
+UNFREEZE_FRACTION = 0.3   # last 20-30% of backbone layers
 FREEZE_BATCHNORM = True    # keep BN frozen; set False only if training is stable without it
-fine_tune_epochs = 12
+fine_tune_epochs = 20
 fine_tune_lr = 1e-5
 
 base_model.trainable = True
