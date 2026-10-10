@@ -220,7 +220,10 @@ def plot_efficiency_table(transfer_metrics, finetuned_metrics, out_dir):
         ("Macro precision", "macro_precision", "{:.4f}"),
         ("Macro recall", "macro_recall", "{:.4f}"),
     ]
-    cells = [[label, fmt.format(transfer_metrics[k]), fmt.format(finetuned_metrics[k])]
+    def display(value, fmt):
+        return "N/A" if value is None else fmt.format(value)
+
+    cells = [[label, display(transfer_metrics[k], fmt), display(finetuned_metrics[k], fmt)]
              for label, k, fmt in rows]
     fig, ax = plt.subplots(figsize=(7, 3.4))
     ax.axis("off")
