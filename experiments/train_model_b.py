@@ -1,7 +1,7 @@
 """Train Model B on the shared Fashion-MNIST 70/15/15 split.
 
 Run from the repo root:
-    python -m experiments.train_model_b --epochs 30
+    python -m experiments.train_model_b --epochs 60
 
 Outputs:
     results/models/model_b.keras            best checkpoint by val_loss (git-ignored)
@@ -38,7 +38,7 @@ class EpochTimer(keras.callbacks.Callback):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--epochs", type=int, default=60)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--seed", type=int, default=42)
