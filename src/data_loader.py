@@ -46,8 +46,8 @@ def make_tf_datasets(batch_size=128, sota=False, size=32, shuffle_seed=42):
 
     train_ds = tf.data.Dataset.from_tensor_slices((x_train, y_train))
     train_ds = train_ds.shuffle(len(x_train), seed=shuffle_seed, reshuffle_each_iteration=True)
-    train_ds = train_ds.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    train_ds = train_ds.batch(batch_size).prefetch(tf.data.AUTOTUNE).cache()
 
-    val_ds = tf.data.Dataset.from_tensor_slices((x_val, y_val)).batch(batch_size).prefetch(tf.data.AUTOTUNE)
-    test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    val_ds = tf.data.Dataset.from_tensor_slices((x_val, y_val)).batch(batch_size).prefetch(tf.data.AUTOTUNE).cache()
+    test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(batch_size).prefetch(tf.data.AUTOTUNE).cache()
     return train_ds, val_ds, test_ds
