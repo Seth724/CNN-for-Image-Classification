@@ -24,7 +24,7 @@ from src.evaluation import (
 # Keep these choices together so the experiment setup is easy to review.
 INPUT_SIZE = 32            # Match the current EfficientNet input for Q6 comparison.
 NUM_CLASSES = 10           # Fashion-MNIST has ten labels.
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 SEED = 42
 HEAD_EPOCHS = 10
 FINE_TUNE_EPOCHS = 20
