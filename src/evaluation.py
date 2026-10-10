@@ -60,6 +60,68 @@ def estimate_flops(model):
         return None
 
 
+_FLOPS_NOT_PROVIDED = object()
+
+
+def estimate_macs(model, flops=_FLOPS_NOT_PROVIDED):
+    """Estimate multiply-accumulate operations per image from the FLOPs count.
+
+    For convolution- and dense-heavy models, one multiply-accumulate is often
+    counted as about two floating-point operations (multiply + add). This is
+    an approximation; profiler conventions and other operations can differ.
+    """
+    # Pass an existing FLOPs result when you already measured it, avoiding a
+    # second TensorFlow trace/profiling run.
+    if flops is _FLOPS_NOT_PROVIDED:
+        flops = estimate_flops(model)
+    return int(flops // 2) if flops is not None else None
+
+
+def measure_cpu_latency_ms(model, warmup_runs=10, measured_runs=100):
+    """Return median single-image inference latency in milliseconds on CPU.
+
+    The helper clones the trained model and copies its weights inside a CPU
+    device scope, so a model trained on GPU is still measured on CPU. The
+    synthetic all-zero input has the model's input shape; no test images are
+    needed for a timing measurement.
+    """
+    if warmup_runs < 0:
+        raise ValueError("warmup_runs must be zero or greater")
+    if measured_runs < 1:
+        raise ValueError("measured_runs must be at least one")
+
+    # This helper expects one fixed-shape image input, as used by the project models.
+    input_shape = model.input_shape
+    if isinstance(input_shape, list):
+        raise ValueError("CPU latency helper expects a model with one input")
+    sample_shape = tuple(input_shape[1:])
+    if any(dim is None for dim in sample_shape):
+        raise ValueError("CPU latency helper expects fixed non-batch input dimensions")
+
+    with tf.device("/CPU:0"):
+        # Cloning inside the CPU scope places the benchmark model on CPU even
+        # when the original model was trained on a GPU. Copy over trained weights.
+        cpu_model = keras.models.clone_model(model)
+        cpu_model.set_weights(model.get_weights())
+        sample = tf.zeros((1, *sample_shape), dtype=tf.float32)
+
+        # Trace once and warm up first; exclude tracing/start-up time from results.
+        @tf.function
+        def predict_one(batch):
+            return cpu_model(batch, training=False)
+
+        for _ in range(warmup_runs):
+            predict_one(sample).numpy()  # .numpy() waits for CPU work to finish.
+
+        run_times_ms = []
+        for _ in range(measured_runs):
+            start = time.perf_counter()
+            predict_one(sample).numpy()
+            run_times_ms.append((time.perf_counter() - start) * 1000.0)
+
+    return float(np.median(run_times_ms))
+
+
 def macro_precision_recall(y_true, y_pred, num_classes):
     """Macro-averaged precision and recall (classes with no predictions count as 0)."""
     cm = np.zeros((num_classes, num_classes), dtype=np.int64)
