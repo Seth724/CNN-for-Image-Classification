@@ -48,7 +48,7 @@ model.compile(
 
 # ---------------- Phase 1: transfer learning (backbone frozen) ----------------
 
-print("Phase 1: training the head for {} epochs...".format(epochs))
+print("Phase 1: training the head for {} epochs...".format(CONFIG.transfer_learning_epochs))
 timer = EpochTimer()
 history_transfer = model.fit(
     train_ds,
