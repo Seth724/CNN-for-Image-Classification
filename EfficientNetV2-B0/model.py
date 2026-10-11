@@ -6,6 +6,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 import keras
 from keras import layers
+from config import CONFIG
 from src.data_loader import make_tf_datasets
 from src.evaluation import EpochTimer, collect_metrics, predict_labels
 from src import plots
@@ -15,22 +16,26 @@ OUT_DIR = ROOT / "results" / "efficientnetv2_b0"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 keras.utils.set_random_seed(42)
 
-train_ds, val_ds, test_ds = make_tf_datasets(batch_size=32, sota=True, size=32)
+train_ds, val_ds, test_ds = make_tf_datasets(
+    batch_size=CONFIG.batch_size,
+    sota=True,
+    size=CONFIG.image_input_size,
+)
 
 base_model = keras.applications.EfficientNetV2B0(
     include_top=False,
     weights='imagenet',
-    input_shape=(32, 32, 3),
+    input_shape=CONFIG.input_shape,
 )
 
 base_model.trainable = False # Freeze the base model
 
-inputs = keras.Input(shape=(32, 32, 3))
+inputs = keras.Input(shape=CONFIG.input_shape)
 
 x = base_model(inputs, training=False)
 x = keras.layers.GlobalAveragePooling2D()(x)
-x = keras.layers.Dropout(0.2)(x)
-outputs = keras.layers.Dense(10, activation='softmax')(x)
+x = keras.layers.Dropout(CONFIG.dropout)(x)
+outputs = keras.layers.Dense(CONFIG.output_nodes, activation=CONFIG.activation)(x)
 model  = keras.Model(inputs, outputs)
 
 model.summary(show_trainable=True)
@@ -42,12 +47,12 @@ model.compile(
 )
 
 # ---------------- Phase 1: transfer learning (backbone frozen) ----------------
-epochs = 10
-print("Phase 1: training the head for {} epochs...".format(epochs))
+
+print("Phase 1: training the head for {} epochs...".format(CONFIG.transfer_learning_epochs))
 timer = EpochTimer()
 history_transfer = model.fit(
     train_ds,
-    epochs=epochs,
+    epochs=CONFIG.transfer_learning_epochs,
     validation_data=val_ds,
     callbacks=[
         timer,
@@ -58,7 +63,7 @@ history_transfer = model.fit(
 )
 
 print("\nPhase 1 metrics on the test set:")
-metrics_transfer = collect_metrics(model, test_ds, timer, num_classes=10, save_path=str(OUT_DIR / "transfer_metrics.json"))
+metrics_transfer = collect_metrics(model, test_ds, timer, num_classes=CONFIG.output_nodes, save_path=str(OUT_DIR / "transfer_metrics.json"))
 model.save(str(OUT_DIR / "transfer.keras"))  # lets phase 2 be rerun on its own
 
 FIG_DIR = OUT_DIR / "figures"
@@ -71,13 +76,10 @@ plots.plot_stage_report(model, test_ds, history_transfer, timer.epoch_times, cla
 
 
 # ---------------- Phase 2: fine-tuning (last part of backbone unfrozen) ----------------
-UNFREEZE_FRACTION = 0.3   # last 20-30% of backbone layers
 FREEZE_BATCHNORM = True    # keep BN frozen; set False only if training is stable without it
-fine_tune_epochs = 20
-fine_tune_lr = 1e-5
 
 base_model.trainable = True
-n_unfreeze = int(len(base_model.layers) * UNFREEZE_FRACTION)
+n_unfreeze = int(len(base_model.layers) * CONFIG.unfreeze_fraction)
 for layer in base_model.layers[:-n_unfreeze]:
     layer.trainable = False
 if FREEZE_BATCHNORM:
@@ -87,7 +89,7 @@ if FREEZE_BATCHNORM:
 print("Phase 2: unfroze last {} of {} backbone layers".format(n_unfreeze, len(base_model.layers)))
 
 model.compile(
-    optimizer=keras.optimizers.Adam(learning_rate=fine_tune_lr),
+    optimizer=keras.optimizers.Adam(learning_rate=CONFIG.fine_tune_lr),
     loss=keras.losses.SparseCategoricalCrossentropy(),
     metrics=[keras.metrics.SparseCategoricalAccuracy()],
 )
@@ -96,7 +98,7 @@ model.summary(show_trainable=True)
 ft_timer = EpochTimer()
 history_finetune = model.fit(
     train_ds,
-    epochs=fine_tune_epochs,
+    epochs=CONFIG.fine_tune_epochs,
     validation_data=val_ds,
     callbacks=[
         ft_timer,
@@ -110,7 +112,7 @@ history_finetune = model.fit(
 model.save(str(OUT_DIR / "finetuned.keras"))
 
 print("\nPhase 2 (fine-tuned) metrics on the test set:")
-metrics_finetuned = collect_metrics(model, test_ds, ft_timer, num_classes=10, save_path=str(OUT_DIR / "finetuned_metrics.json"))
+metrics_finetuned = collect_metrics(model, test_ds, ft_timer, num_classes=CONFIG.output_nodes, save_path=str(OUT_DIR / "finetuned_metrics.json"))
 
 # ---------------- Fine tuned model plots ----------------
 _, pred_finetuned = predict_labels(model, test_ds)
