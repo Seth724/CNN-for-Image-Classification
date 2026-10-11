@@ -10,3 +10,4 @@ data/raw/*
 *.tflite
 outputs/
 .ipynb_checkpoints/
+results/*/models/
