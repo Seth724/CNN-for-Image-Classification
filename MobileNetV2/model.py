@@ -71,7 +71,7 @@ def main():
     #   -> Rescaling(1 / 127.5, offset=-1)
     #   -> MobileNetV2(include_top=False, weights="imagenet", alpha=ALPHA)
     #   -> GlobalAveragePooling2D
-    #   -> Dropout(0.2)
+    #   -> Dropout(0.3)
     #   -> Dense(NUM_CLASSES, activation="softmax")
     # MobileNetV2 needs the explicit rescaling to [-1, 1]. EfficientNetV2 has
     # different built-in preprocessing, so do not copy that part unchanged.
@@ -85,7 +85,7 @@ def main():
     #       weights="imagenet", alpha=ALPHA)
     #   x = backbone(x, training=False)  # call a layer by adding (x)
     #   x = keras.layers.GlobalAveragePooling2D()(x)
-    #   x = keras.layers.Dropout(0.2)(x)
+    #   x = keras.layers.Dropout(0.3)(x)
     #   outputs = keras.layers.Dense(NUM_CLASSES, activation="softmax")(x)
     #   model = keras.Model(inputs, outputs)
     inputs = keras.Input(shape=(INPUT_SIZE, INPUT_SIZE, 3))
@@ -99,7 +99,7 @@ def main():
     x = keras.layers.Rescaling(1.0 / 127.5, offset=-1)(inputs)
     x = base_model(x, training=False)
     x = keras.layers.GlobalAveragePooling2D()(x)
-    x = keras.layers.Dropout(0.2)(x)
+    x = keras.layers.Dropout(0.3)(x)
     outputs = keras.layers.Dense(NUM_CLASSES, activation="softmax")(x)
     model = keras.Model(inputs=inputs, outputs=outputs)   
 
