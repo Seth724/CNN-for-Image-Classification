@@ -22,7 +22,7 @@ from src.evaluation import (
 
 
 # Keep these choices together so the experiment setup is easy to review.
-INPUT_SIZE = 32            # Match the current EfficientNet input for Q6 comparison.
+INPUT_SIZE = 64            # Exploratory run; the recorded Q6 baseline uses 32x32.
 NUM_CLASSES = 10           # Fashion-MNIST has ten labels.
 BATCH_SIZE = 8
 SEED = 42
@@ -39,7 +39,7 @@ ALPHA = 1.0                # Keep the standard MobileNetV2 width for the baselin
 OUTPUT_DIR = Path(
     os.environ.get(
         "MOBILENETV2_OUTPUT_DIR",
-        str(ROOT / "results" / "mobilenetv2"),
+        str(ROOT / "results" / "mobilenetv2_64"),
     )
 )
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
