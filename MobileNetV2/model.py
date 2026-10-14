@@ -30,7 +30,7 @@ HEAD_EPOCHS = 10
 FINE_TUNE_EPOCHS = 30
 HEAD_LEARNING_RATE = 1e-3
 FINE_TUNE_LEARNING_RATE = 1e-5
-FINE_TUNE_FRACTION = 0.3   # Fine-tune the last 30%, like the EfficientNet script.
+FINE_TUNE_FRACTION = 0.2   # Fine-tune the last 30%, like the EfficientNet script.
 ALPHA = 1.0                # Keep the standard MobileNetV2 width for the baseline.
 
 # Each SOTA model must keep its own figures, metrics, logs, and checkpoints.
