@@ -11,3 +11,4 @@ data/raw/*
 outputs/
 .ipynb_checkpoints/
 results/*/models/
+results/models/
