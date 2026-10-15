@@ -1,6 +1,8 @@
 import argparse
 import csv
 import json
+import os
+import statistics
 import sys
 import time
 from pathlib import Path
@@ -12,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.data_loader import make_tf_datasets
-from src.evaluation import evaluate_classifier, plot_history
+from src.evaluation import EpochTimer, evaluate_classifier, plot_history
 from src.models import build_model_a
 from src.utils import architecture_metrics, save_json
 
@@ -79,10 +81,20 @@ def main():
         metrics=["accuracy"],
     )
     training_start = time.perf_counter()
-    history = model.fit(train_ds, validation_data=val_ds, epochs=args.epochs, shuffle=False)
+    epoch_timer = EpochTimer()
+    history = model.fit(
+        train_ds,
+        validation_data=val_ds,
+        epochs=args.epochs,
+        shuffle=False,
+        callbacks=[epoch_timer],
+    )
     training_seconds = time.perf_counter() - training_start
 
-    model.save(models_dir / "model_a.keras")
+    model_path = models_dir / "model_a.keras"
+    model.save(model_path)
+    model_size_kb = os.path.getsize(model_path) / 1024
+    steady_epoch_times = epoch_timer.epoch_times[1:] or epoch_timer.epoch_times
     evaluation_start = time.perf_counter()
     test_loss, test_accuracy = model.evaluate(test_ds, verbose=0)
     evaluation = evaluate_classifier(
@@ -114,6 +126,11 @@ def main():
             "momentum": args.momentum if args.optimizer == "sgd_momentum" else 0.0,
             "test_loss": float(test_loss),
             "test_accuracy": float(test_accuracy),
+            "model_size_kb": round(model_size_kb, 2),
+            "model_size_mb": round(model_size_kb / 1024, 3),
+            "mean_epoch_time_s": round(float(sum(steady_epoch_times) / len(steady_epoch_times)), 3),
+            "median_epoch_time_s": round(float(statistics.median(epoch_timer.epoch_times)), 3),
+            "epoch_times_s": [round(value, 3) for value in epoch_timer.epoch_times],
             "training_seconds": round(training_seconds, 3),
             "evaluation_seconds": round(evaluation_seconds, 3),
             "total_run_seconds": round(time.perf_counter() - total_start, 3),
