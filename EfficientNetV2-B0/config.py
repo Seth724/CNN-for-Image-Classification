@@ -3,13 +3,13 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class EfficientNetV2B0Config:
-    batch_size: int = 32
+    batch_size: int = 16
     image_input_size: int = 32
     dropout: float = 0.2
     output_nodes: int = 10
     activation: str = "softmax"
-    transfer_learning_epochs: int = 10
-    unfreeze_fraction: float = 0.3
+    transfer_learning_epochs: int = 20
+    unfreeze_fraction: float = 0.4
     fine_tune_epochs: int = 20
     fine_tune_lr: float = 1e-5
 
