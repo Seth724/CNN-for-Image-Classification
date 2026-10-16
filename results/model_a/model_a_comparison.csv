@@ -1,0 +1,3 @@
+model,run,optimizer,learning_rate,epochs,batch_size,total_parameters,model_size_kb,training_time_per_epoch_s,test_accuracy,macro_precision,macro_recall,macro_f1
+Model A,model_a_adam_lr0.003_bs64_e20,adam,0.003,20,64,101578,1235.82,3.156,0.9184761643409729,0.918818499366369,0.9184761904761904,0.9176886043047932
+Model A,model_a_rmsprop_lr0.002_bs128_e20,rmsprop,0.002,20,128,101578,835.4,2.178,0.9172381162643433,0.9195411578897339,0.9172380952380952,0.916464405911578
