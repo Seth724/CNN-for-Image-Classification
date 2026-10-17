@@ -132,23 +132,17 @@ Keep the seed and all other settings fixed during each comparison.
 
 ## 5. Run Model B
 
-Model B saves to fixed paths inside the repository, so copy each run to Drive
-before starting another Model B run:
+`scripts/train_model_b.py` takes the same arguments as `train_model_a.py` and
+writes the same files into its `--output-dir`:
 
 ```python
-!python -m experiments.train_model_b --epochs 60 --batch-size 128 --lr 0.001 --seed 42
-!python -m experiments.evaluate_model_b
-!mkdir -p "$DRIVE_ROOT/model_b_adam_lr1e-3_bs128_e60"
-!cp -r results/models "$DRIVE_ROOT/model_b_adam_lr1e-3_bs128_e60/"
-!cp -r results/metrics "$DRIVE_ROOT/model_b_adam_lr1e-3_bs128_e60/"
-!cp -r results/figures "$DRIVE_ROOT/model_b_adam_lr1e-3_bs128_e60/"
+!python scripts/train_model_b.py --epochs 20 --batch-size 128 --optimizer adam --learning-rate 0.001 --seed 42 --output-dir "$DRIVE_ROOT/model_b_adam_lr1e-3_bs128_e20"
 ```
 
-Model B's comparison metrics are in:
-
-```text
-results/metrics/model_b_metrics.json
-```
+Model B's comparison metrics are in `<run>/metrics/evaluation.json`. It also
+records `final_val_accuracy`, so configurations can be chosen on validation
+accuracy without using the test set. The full Model B sweep is in
+`results/model_b/model_b_configurations.ipynb`.
 
 ## 6. Build the assignment comparison table
 
@@ -165,18 +159,7 @@ rows = []
 for path in root.glob("*/metrics/evaluation.json"):
     metrics = json.loads(path.read_text())
     rows.append({
-        "model": "Model A",
-        "run": path.parent.parent.name,
-        "total_parameters": metrics.get("total_parameters"),
-        "model_size_kb": metrics.get("model_size_kb"),
-        "mean_epoch_time_s": metrics.get("mean_epoch_time_s"),
-        "test_accuracy": metrics.get("test_accuracy"),
-    })
-
-for path in root.glob("*/metrics/model_b_metrics.json"):
-    metrics = json.loads(path.read_text())
-    rows.append({
-        "model": "Model B",
+        "model": "Model B" if metrics.get("model") == "model_b" else "Model A",
         "run": path.parent.parent.name,
         "total_parameters": metrics.get("total_parameters"),
         "model_size_kb": metrics.get("model_size_kb"),
