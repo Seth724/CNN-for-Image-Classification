@@ -213,6 +213,7 @@ def evaluate_classifier(
     test_dataset: tf.data.Dataset,
     output_dir: str | Path,
     class_names: list[str] | None = None,
+    title: str = "Model A confusion matrix",
 ) -> dict[str, Any]:
     """Evaluate a classifier and save metrics, confusion matrix, and figures."""
     import matplotlib.pyplot as plt
@@ -234,7 +235,7 @@ def evaluate_classifier(
     figure.colorbar(image, ax=axis)
     axis.set_xlabel("Predicted label")
     axis.set_ylabel("True label")
-    axis.set_title("Model A confusion matrix")
+    axis.set_title(title)
     axis.set_xticks(range(num_classes), metrics["class_names"], rotation=45, ha="right")
     axis.set_yticks(range(num_classes), metrics["class_names"])
     for row in range(num_classes):
