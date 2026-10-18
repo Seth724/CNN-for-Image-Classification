@@ -1,0 +1,143 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792343916.682276    7036 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Run directory: /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw
+W0000 00:00:1792343923.103343    7036 gpu_bfc_allocator.cc:47] Overriding orig_value setting because the TF_FORCE_GPU_ALLOW_GROWTH environment variable is set. Original config value was false.
+I0000 00:00:1792343923.105190    7036 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 13757 MB memory:  -> device: 0, name: Tesla T4, pci bus id: 0000:00:04.0, compute capability: 7.5
+/content/CNN-for-Image-Classification/MobileNetV2/model.py:119: UserWarning: `input_shape` is undefined or non-square, or `rows` is not in [96, 128, 160, 192, 224]. Weights for input shape (224, 224) will be loaded as the default.
+  base_model = keras.applications.MobileNetV2(
+Downloading data from https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v2/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_1.0_224_no_top.h5
+9406464/9406464 ━━━━━━━━━━━━━━━━━━━━ 2s 0us/step
+
+Stage 1: training the classifier head
+Model: "functional"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━┓
+┃ Layer (type)                ┃ Output Shape          ┃    Param # ┃ Trai… ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━┩
+│ input_layer (InputLayer)    │ (None, 64, 64, 3)     │          0 │   -   │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ rescaling (Rescaling)       │ (None, 64, 64, 3)     │          0 │   -   │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ mobilenetv2_1.00_224        │ (None, 2, 2, 1280)    │  2,257,984 │   N   │
+│ (Functional)                │                       │            │       │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ global_average_pooling2d    │ (None, 1280)          │          0 │   -   │
+│ (GlobalAveragePooling2D)    │                       │            │       │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ dropout (Dropout)           │ (None, 1280)          │          0 │   -   │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ dense (Dense)               │ (None, 10)            │     12,810 │   Y   │
+└─────────────────────────────┴───────────────────────┴────────────┴───────┘
+ Total params: 2,270,794 (8.66 MB)
+ Trainable params: 12,810 (50.04 KB)
+ Non-trainable params: 2,257,984 (8.61 MB)
+Epoch 1/10
+I0000 00:00:1792343933.505929    7083 service.cc:153] XLA service 0x7a59a805d220 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1792343933.505990    7083 service.cc:161]   StreamExecutor [0]: Tesla T4, Compute Capability 7.5 (Driver: 13.0.0; Runtime: 12.9.0; Toolkit: 12.5.0; DNN: 9.27.0)
+I0000 00:00:1792343933.626254    7083 dump_mlir_util.cc:269] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+I0000 00:00:1792343934.441536    7083 cuda_dnn.cc:461] Loaded cuDNN version 92700
+I0000 00:00:1792343934.535588    7083 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_7882__.118
+I0000 00:00:1792343940.107183    7083 device_compiler.h:208] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 57s 8ms/step - loss: 0.5890 - sparse_categorical_accuracy: 0.8041 - val_loss: 0.4630 - val_sparse_categorical_accuracy: 0.8463
+Epoch 2/10
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 41s 7ms/step - loss: 0.4957 - sparse_categorical_accuracy: 0.8345 - val_loss: 0.4580 - val_sparse_categorical_accuracy: 0.8495
+Epoch 3/10
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 40s 7ms/step - loss: 0.4864 - sparse_categorical_accuracy: 0.8393 - val_loss: 0.4963 - val_sparse_categorical_accuracy: 0.8361
+Epoch 4/10
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 40s 7ms/step - loss: 0.4815 - sparse_categorical_accuracy: 0.8417 - val_loss: 0.4622 - val_sparse_categorical_accuracy: 0.8492
+Epoch 5/10
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 40s 6ms/step - loss: 0.4755 - sparse_categorical_accuracy: 0.8435 - val_loss: 0.4896 - val_sparse_categorical_accuracy: 0.8433
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/stage1_validation/figures/confusion_matrix.png
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/stage1_validation/figures/per_class_metrics.png
+Best Stage 1 validation loss: 0.4580
+
+Stage 2: requested 46 of 154 layers; 46 non-BN layers are trainable (24 have trainable weights).
+Model: "functional"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━┓
+┃ Layer (type)                ┃ Output Shape          ┃    Param # ┃ Trai… ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━┩
+│ input_layer (InputLayer)    │ (None, 64, 64, 3)     │          0 │   -   │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ rescaling (Rescaling)       │ (None, 64, 64, 3)     │          0 │   -   │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ mobilenetv2_1.00_224        │ (None, 2, 2, 1280)    │  2,257,984 │   Y   │
+│ (Functional)                │                       │            │       │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ global_average_pooling2d    │ (None, 1280)          │          0 │   -   │
+│ (GlobalAveragePooling2D)    │                       │            │       │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ dropout (Dropout)           │ (None, 1280)          │          0 │   -   │
+├─────────────────────────────┼───────────────────────┼────────────┼───────┤
+│ dense (Dense)               │ (None, 10)            │     12,810 │   Y   │
+└─────────────────────────────┴───────────────────────┴────────────┴───────┘
+ Total params: 2,270,794 (8.66 MB)
+ Trainable params: 2,000,650 (7.63 MB)
+ Non-trainable params: 270,144 (1.03 MB)
+Epoch 1/30
+I0000 00:00:1792344349.799260    7083 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_1260630__.118
+E0000 00:00:1792344351.164455    7083 cuda_timer.cc:87] Delay kernel timed out: measured time has sub-optimal accuracy. There may be a missing warmup execution, please investigate in Nsight Systems.
+E0000 00:00:1792344351.319700    7083 cuda_timer.cc:87] Delay kernel timed out: measured time has sub-optimal accuracy. There may be a missing warmup execution, please investigate in Nsight Systems.
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 67s 8ms/step - loss: 0.3973 - sparse_categorical_accuracy: 0.8599 - val_loss: 0.3382 - val_sparse_categorical_accuracy: 0.8806
+Epoch 2/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 46s 7ms/step - loss: 0.2999 - sparse_categorical_accuracy: 0.8908 - val_loss: 0.2923 - val_sparse_categorical_accuracy: 0.8937
+Epoch 3/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 46s 7ms/step - loss: 0.2470 - sparse_categorical_accuracy: 0.9103 - val_loss: 0.2619 - val_sparse_categorical_accuracy: 0.9064
+Epoch 4/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 45s 7ms/step - loss: 0.2105 - sparse_categorical_accuracy: 0.9221 - val_loss: 0.2725 - val_sparse_categorical_accuracy: 0.9003
+Epoch 5/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 46s 7ms/step - loss: 0.1837 - sparse_categorical_accuracy: 0.9326 - val_loss: 0.2398 - val_sparse_categorical_accuracy: 0.9126
+Epoch 6/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 45s 7ms/step - loss: 0.1615 - sparse_categorical_accuracy: 0.9393 - val_loss: 0.2500 - val_sparse_categorical_accuracy: 0.9126
+Epoch 7/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 45s 7ms/step - loss: 0.1433 - sparse_categorical_accuracy: 0.9473 - val_loss: 0.2659 - val_sparse_categorical_accuracy: 0.9122
+Epoch 8/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 81s 7ms/step - loss: 0.1239 - sparse_categorical_accuracy: 0.9529 - val_loss: 0.2516 - val_sparse_categorical_accuracy: 0.9155
+Epoch 9/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 45s 7ms/step - loss: 0.1106 - sparse_categorical_accuracy: 0.9585 - val_loss: 0.2911 - val_sparse_categorical_accuracy: 0.9168
+Epoch 10/30
+6125/6125 ━━━━━━━━━━━━━━━━━━━━ 49s 8ms/step - loss: 0.0990 - sparse_categorical_accuracy: 0.9632 - val_loss: 0.2507 - val_sparse_categorical_accuracy: 0.9211
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/stage2_validation/figures/confusion_matrix.png
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/stage2_validation/figures/per_class_metrics.png
+Best Stage 2 validation loss: 0.2398
+
+Measuring model computation and CPU inference latency
+I0000 00:00:1792345058.138360    7036 devices.cc:67] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+I0000 00:00:1792345058.138557    7036 single_machine.cc:376] Starting new session
+I0000 00:00:1792345058.149045    7036 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 13757 MB memory:  -> device: 0, name: Tesla T4, pci bus id: 0000:00:04.0, compute capability: 7.5
+WARNING:tensorflow:From /usr/local/lib/python3.13/dist-packages/tensorflow/python/profiler/internal/flops_registry.py:140: tensor_shape_from_node_def_name (from tensorflow.python.framework.graph_util_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This API was designed for TensorFlow v1. See https://www.tensorflow.org/guide/migrate for instructions on how to migrate your code to TensorFlow v2.
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/figures/stage1/learning_curves.png
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/figures/stage2/learning_curves.png
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/figures/comparison/full_training_curve.png
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/figures/stage1/epoch_times.png
+Saved /content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw/figures/stage2/epoch_times.png
+
+Selected model:  fine_tuning
+{
+  "split": "validation",
+  "images": 10500,
+  "validation_loss": 0.23984792828559875,
+  "validation_accuracy": 0.9125714285714286,
+  "macro_precision": 0.9130564106193834,
+  "macro_recall": 0.9125714285714286,
+  "macro_f1": 0.9127210513890006,
+  "weighted_f1": 0.9127210513890007,
+  "total_parameters": 2270794,
+  "trainable_parameters": 2000650,
+  "non_trainable_parameters": 270144,
+  "training_checkpoint_size_mib": 24.506260871887207,
+  "inference_model_size_mib": 9.215943336486816,
+  "weight_data_size_mib": 8.662391662597656,
+  "flops_per_image": 50162684,
+  "mflops_per_image": 50.162684,
+  "estimated_macs_per_image": 25081342,
+  "cpu_inference_median_ms_per_image_batch1": 4.544919999943886,
+  "cpu_latency_warmup_runs": 10,
+  "cpu_latency_measured_runs": 100,
+  "selected_stage": "fine_tuning",
+  "input_size": 64,
+  "fine_tune_fraction": 0.3
+}
+Test data has not been evaluated. After choosing the configuration, run:
+python MobileNetV2/model.py --test_with_test_data "/content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw"

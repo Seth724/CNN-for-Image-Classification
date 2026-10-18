@@ -1,0 +1,211 @@
+{
+  "run_number": 8,
+  "model": "MobileNetV2",
+  "run_directory": "/content/drive/MyDrive/EN3150_A03/mobilenetv2_64/run_20261018_171840Z_um1rjogw",
+  "raw_log_file": "run08_training_log.txt",
+  "configuration_reported_or_inferred_from_log": {
+    "input_size": 64,
+    "batch_size": 8,
+    "batch_size_basis": "6125 batches for the shared 49000 training images",
+    "fine_tune_fraction": 0.3,
+    "backbone_layers": 154,
+    "requested_non_bn_layers": 46,
+    "trainable_backbone_layers": 46,
+    "trainable_weight_bearing_backbone_layers": 24,
+    "head_epoch_limit": 10,
+    "fine_tune_epoch_limit": 30
+  },
+  "unverified_run_config_defaults": {
+    "source": "Local model.py defaults; not explicitly printed in the supplied log. Confirm using the saved config.json for the final report.",
+    "seed": 42,
+    "dropout": 0.2,
+    "alpha": 1.0,
+    "head_learning_rate": 0.001,
+    "fine_tune_learning_rate": 1e-05,
+    "head_patience": 3,
+    "fine_tune_patience": 5
+  },
+  "head_epochs_completed": 5,
+  "fine_tune_epochs_completed": 10,
+  "head_selected_epoch": 2,
+  "fine_tune_selected_epoch": 5,
+  "peak_validation_accuracy": 0.9211,
+  "selected_metrics": {
+    "split": "validation",
+    "images": 10500,
+    "validation_loss": 0.23984792828559875,
+    "validation_accuracy": 0.9125714285714286,
+    "macro_precision": 0.9130564106193834,
+    "macro_recall": 0.9125714285714286,
+    "macro_f1": 0.9127210513890006,
+    "weighted_f1": 0.9127210513890007,
+    "total_parameters": 2270794,
+    "trainable_parameters": 2000650,
+    "non_trainable_parameters": 270144,
+    "training_checkpoint_size_mib": 24.506260871887207,
+    "inference_model_size_mib": 9.215943336486816,
+    "weight_data_size_mib": 8.662391662597656,
+    "flops_per_image": 50162684,
+    "mflops_per_image": 50.162684,
+    "estimated_macs_per_image": 25081342,
+    "cpu_inference_median_ms_per_image_batch1": 4.544919999943886,
+    "cpu_latency_warmup_runs": 10,
+    "cpu_latency_measured_runs": 100,
+    "selected_stage": "fine_tuning",
+    "input_size": 64,
+    "fine_tune_fraction": 0.3
+  },
+  "epochs_as_displayed": [
+    {
+      "stage": "head",
+      "epoch": 1,
+      "epoch_limit": 10,
+      "train_loss": 0.589,
+      "train_accuracy": 0.8041,
+      "validation_loss": 0.463,
+      "validation_accuracy": 0.8463,
+      "displayed_epoch_seconds": 57
+    },
+    {
+      "stage": "head",
+      "epoch": 2,
+      "epoch_limit": 10,
+      "train_loss": 0.4957,
+      "train_accuracy": 0.8345,
+      "validation_loss": 0.458,
+      "validation_accuracy": 0.8495,
+      "displayed_epoch_seconds": 41
+    },
+    {
+      "stage": "head",
+      "epoch": 3,
+      "epoch_limit": 10,
+      "train_loss": 0.4864,
+      "train_accuracy": 0.8393,
+      "validation_loss": 0.4963,
+      "validation_accuracy": 0.8361,
+      "displayed_epoch_seconds": 40
+    },
+    {
+      "stage": "head",
+      "epoch": 4,
+      "epoch_limit": 10,
+      "train_loss": 0.4815,
+      "train_accuracy": 0.8417,
+      "validation_loss": 0.4622,
+      "validation_accuracy": 0.8492,
+      "displayed_epoch_seconds": 40
+    },
+    {
+      "stage": "head",
+      "epoch": 5,
+      "epoch_limit": 10,
+      "train_loss": 0.4755,
+      "train_accuracy": 0.8435,
+      "validation_loss": 0.4896,
+      "validation_accuracy": 0.8433,
+      "displayed_epoch_seconds": 40
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 1,
+      "epoch_limit": 30,
+      "train_loss": 0.3973,
+      "train_accuracy": 0.8599,
+      "validation_loss": 0.3382,
+      "validation_accuracy": 0.8806,
+      "displayed_epoch_seconds": 67
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 2,
+      "epoch_limit": 30,
+      "train_loss": 0.2999,
+      "train_accuracy": 0.8908,
+      "validation_loss": 0.2923,
+      "validation_accuracy": 0.8937,
+      "displayed_epoch_seconds": 46
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 3,
+      "epoch_limit": 30,
+      "train_loss": 0.247,
+      "train_accuracy": 0.9103,
+      "validation_loss": 0.2619,
+      "validation_accuracy": 0.9064,
+      "displayed_epoch_seconds": 46
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 4,
+      "epoch_limit": 30,
+      "train_loss": 0.2105,
+      "train_accuracy": 0.9221,
+      "validation_loss": 0.2725,
+      "validation_accuracy": 0.9003,
+      "displayed_epoch_seconds": 45
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 5,
+      "epoch_limit": 30,
+      "train_loss": 0.1837,
+      "train_accuracy": 0.9326,
+      "validation_loss": 0.2398,
+      "validation_accuracy": 0.9126,
+      "displayed_epoch_seconds": 46
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 6,
+      "epoch_limit": 30,
+      "train_loss": 0.1615,
+      "train_accuracy": 0.9393,
+      "validation_loss": 0.25,
+      "validation_accuracy": 0.9126,
+      "displayed_epoch_seconds": 45
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 7,
+      "epoch_limit": 30,
+      "train_loss": 0.1433,
+      "train_accuracy": 0.9473,
+      "validation_loss": 0.2659,
+      "validation_accuracy": 0.9122,
+      "displayed_epoch_seconds": 45
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 8,
+      "epoch_limit": 30,
+      "train_loss": 0.1239,
+      "train_accuracy": 0.9529,
+      "validation_loss": 0.2516,
+      "validation_accuracy": 0.9155,
+      "displayed_epoch_seconds": 81
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 9,
+      "epoch_limit": 30,
+      "train_loss": 0.1106,
+      "train_accuracy": 0.9585,
+      "validation_loss": 0.2911,
+      "validation_accuracy": 0.9168,
+      "displayed_epoch_seconds": 45
+    },
+    {
+      "stage": "fine_tuning",
+      "epoch": 10,
+      "epoch_limit": 30,
+      "train_loss": 0.099,
+      "train_accuracy": 0.9632,
+      "validation_loss": 0.2507,
+      "validation_accuracy": 0.9211,
+      "displayed_epoch_seconds": 49
+    }
+  ],
+  "test_evaluated": false
+}

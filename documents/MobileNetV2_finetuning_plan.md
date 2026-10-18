@@ -2,6 +2,8 @@
 
 **Branch:** `MobileNetV2_finetuning`
 **Assignment parts covered:** Q5 (SOTA fine-tuning & evaluation) for MobileNetV2, and the MobileNetV2 inputs needed for Q6 (final comparison vs. Model B).
+
+**Current implementation:** The seven commented stages remain inside `MobileNetV2/model.py`; EfficientNet keeps its Phase 1/Phase 2 code inside its own `model.py`. Both use 64x64 input. The new unfreezing quota fills `int(total_layers * fraction)` slots with non-BatchNormalization layers. Training compares validation results and saves a timestamped run folder. After selecting a configuration, run `python MobileNetV2/model.py --test_with_test_data "RUN_DIR"` (or `python EfficientNetV2-B0/model.py --test_with_test_data "RUN_DIR"`) for final testing without retraining. The original 32x32 baseline plan below is historical context; record the actual resolution/settings in the report.
 **Dataset:** Fashion-MNIST, shared 70/15/15 split (seed 42) in `data/processed/fashion_mnist_70_15_15.npz`.
 
 ---
