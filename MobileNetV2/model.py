@@ -21,7 +21,7 @@ HEAD_EPOCHS = 10
 FINE_TUNE_EPOCHS = 30
 HEAD_LEARNING_RATE = 1e-3
 FINE_TUNE_LEARNING_RATE = 5e-6
-FINE_TUNE_FRACTION = 0.3   # Target 30% of all backbone layers, skipping BatchNorm.
+FINE_TUNE_FRACTION = 0.35  # Target 35% of all backbone layers, skipping BatchNorm.
 DROPOUT = 0.2
 HEAD_PATIENCE = 3
 FINE_TUNE_PATIENCE = 5
@@ -201,7 +201,7 @@ def main():
     # Set the backbone trainable, then calculate the target from ALL layers:
     #   n_unfreeze = int(len(base_model.layers) * FINE_TUNE_FRACTION)
     # Fill that quota from the end, SKIPPING every BatchNormalization layer.
-    # MobileNet: int(154 * 0.3) = 46 non-BN layers marked trainable.
+    # MobileNet: int(154 * 0.35) = 53 non-BN layers marked trainable.
     # Some layers (ReLU/Add/etc.) have no weights; report weight-bearing layers too.
     # Recompile after changing trainability, using the smaller fine-tuning rate.
     # Stage 2 continues from the best stage-1 weights, not from scratch.
