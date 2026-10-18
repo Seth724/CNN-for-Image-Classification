@@ -1,0 +1,3 @@
+model,run,optimizer,learning_rate,epochs,batch_size,total_parameters,model_size_kb,training_time_per_epoch_s,test_accuracy,macro_precision,macro_recall,macro_f1,final_val_accuracy,total_macs,cpu_latency_ms
+Model B,model_b_rmsprop_lr0.003_bs128_e60,rmsprop,0.003,60,128,20522,203.68,1.844,0.9082857370376587,0.9095891741310306,0.9082857142857141,0.9069276731755253,0.9038095474243164,1122112,0.898
+Model B,model_b_adam_lr0.004_bs128_e20,adam,0.004,20,128,20522,288.33,1.927,0.8952381014823914,0.8980300290537642,0.8952380952380953,0.8924199355853011,0.8910475969314575,1122112,0.894

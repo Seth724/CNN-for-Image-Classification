@@ -1,0 +1,20 @@
+run,optimizer,learning_rate,momentum,batch_size,epochs,final_val_accuracy,best_val_accuracy,mean_epoch_time_s,test_accuracy (reference only)
+model_b_rmsprop_lr0.003_bs128_e60,rmsprop,0.003,0.0,128,60,0.9038,0.9155,1.844,0.9083
+model_b_rmsprop_lr0.003_bs128_e40,rmsprop,0.003,0.0,128,40,0.9009,0.9121,1.865,0.9033
+model_b_rmsprop_lr0.003_bs128_e30,rmsprop,0.003,0.0,128,30,0.8956,0.908,1.841,0.9021
+model_b_rmsprop_lr0.003_bs128_e20,rmsprop,0.003,0.0,128,20,0.8913,0.8932,1.853,0.9001
+model_b_adam_lr0.004_bs128_e20,adam,0.004,0.0,128,20,0.891,0.8951,1.927,0.8952
+model_b_rmsprop_lr0.004_bs128_e20,rmsprop,0.004,0.0,128,20,0.8856,0.9005,1.84,0.8931
+model_b_sgd_momentum_lr0.01_bs128_e20_m0.99,sgd_momentum,0.01,0.99,128,20,0.8791,0.882,1.845,0.8867
+model_b_rmsprop_lr0.002_bs128_e20,rmsprop,0.002,0.0,128,20,0.879,0.8816,1.837,0.8881
+model_b_rmsprop_lr0.003_bs64_e20,rmsprop,0.003,0.0,64,20,0.8747,0.8936,2.732,0.8866
+model_b_adam_lr0.003_bs128_e20,adam,0.003,0.0,128,20,0.8741,0.8869,1.961,0.8865
+model_b_adam_lr0.002_bs128_e20,adam,0.002,0.0,128,20,0.874,0.8781,1.88,0.8825
+model_b_rmsprop_lr0.003_bs256_e20,rmsprop,0.003,0.0,256,20,0.8713,0.8713,1.419,0.8807
+model_b_adam_lr0.001_bs128_e20,adam,0.001,0.0,128,20,0.8574,0.8574,1.878,0.865
+model_b_rmsprop_lr0.001_bs128_e20,rmsprop,0.001,0.0,128,20,0.8476,0.8476,2.3,0.8554
+model_b_sgd_momentum_lr0.01_bs128_e20_m0.9,sgd_momentum,0.01,0.9,128,20,0.8117,0.8117,1.843,0.82
+model_b_adam_lr0.0003_bs128_e20,adam,0.0003,0.0,128,20,0.7828,0.7828,1.861,0.7905
+model_b_rmsprop_lr0.0003_bs128_e20,rmsprop,0.0003,0.0,128,20,0.7706,0.7706,1.9,0.7715
+model_b_sgd_momentum_lr0.01_bs128_e20_m0.5,sgd_momentum,0.01,0.5,128,20,0.6857,0.6857,1.833,0.6888
+model_b_sgd_lr0.01_bs128_e20,sgd,0.01,0.0,128,20,0.2732,0.2732,1.803,0.2647

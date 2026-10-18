@@ -44,8 +44,9 @@ Outputs are written to `results/model_a/`:
 
 `evaluation.json` contains test loss and accuracy, macro precision, macro
 recall, macro F1, weighted F1, per-class metrics, the confusion matrix, and
-the measured training time. These are the results to use when comparing
-models. The confusion matrix and training curves are suitable for the report.
+the measured training time. It also records the saved `.keras` model size and
+mean/median epoch time. These are the results to use when comparing models.
+The confusion matrix and training curves are suitable for the report.
 
 Use fewer epochs for a quick smoke test:
 
@@ -99,3 +100,10 @@ make the dataset available in `data/raw/`, prepare the split, and run the same
 training command. GPU-specific files do not need to be committed; commit the
 scripts and metrics, while keeping large model files in notebook artifacts or
 release storage.
+
+## Colab hyperparameter comparison
+
+For the complete Colab setup, separate-output naming, Model A/Model B
+comparison table, saved model-size measurement, and the standard-versus-
+depthwise-separable convolution discussion, see
+`documents/colab_hyperparameter_comparison.md`.
