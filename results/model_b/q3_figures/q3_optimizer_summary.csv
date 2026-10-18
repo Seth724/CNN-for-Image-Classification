@@ -1,0 +1,7 @@
+configuration,run,final_val_loss,final_val_accuracy,epochs_to_80pct_val_accuracy,mean_epoch_time_s,test_accuracy
+"RMSprop, lr 0.003 (chosen)",model_b_rmsprop_lr0.003_bs128_e20,0.2997,0.8913,4,1.853,0.9001
+"Adam, lr 0.001",model_b_adam_lr0.001_bs128_e20,0.4072,0.8574,10,1.878,0.865
+"SGD + momentum 0.9, lr 0.01",model_b_sgd_momentum_lr0.01_bs128_e20_m0.9,0.5111,0.8117,18,1.843,0.82
+"SGD, lr 0.01",model_b_sgd_lr0.01_bs128_e20,1.9809,0.2732,,1.803,0.2647
+"SGD + momentum 0.5, lr 0.01",model_b_sgd_momentum_lr0.01_bs128_e20_m0.5,0.8505,0.6857,,1.833,0.6888
+"SGD + momentum 0.99, lr 0.01",model_b_sgd_momentum_lr0.01_bs128_e20_m0.99,0.3382,0.8791,5,1.845,0.8867

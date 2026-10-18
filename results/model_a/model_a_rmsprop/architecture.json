@@ -1,0 +1,109 @@
+{
+  "model": "model_a",
+  "total_parameters": 101578,
+  "total_macs": 7459968,
+  "layers": [
+    {
+      "name": "image",
+      "type": "InputLayer",
+      "output_shape": [
+        null,
+        28,
+        28,
+        1
+      ],
+      "parameters": 0,
+      "macs": 0
+    },
+    {
+      "name": "conv1_relu",
+      "type": "Conv2D",
+      "output_shape": [
+        null,
+        28,
+        28,
+        32
+      ],
+      "parameters": 320,
+      "macs": 225792
+    },
+    {
+      "name": "pool1",
+      "type": "MaxPooling2D",
+      "output_shape": [
+        null,
+        14,
+        14,
+        32
+      ],
+      "parameters": 0,
+      "macs": 0
+    },
+    {
+      "name": "conv2_relu",
+      "type": "Conv2D",
+      "output_shape": [
+        null,
+        14,
+        14,
+        64
+      ],
+      "parameters": 18496,
+      "macs": 3612672
+    },
+    {
+      "name": "pool2",
+      "type": "MaxPooling2D",
+      "output_shape": [
+        null,
+        7,
+        7,
+        64
+      ],
+      "parameters": 0,
+      "macs": 0
+    },
+    {
+      "name": "conv3_relu",
+      "type": "Conv2D",
+      "output_shape": [
+        null,
+        7,
+        7,
+        128
+      ],
+      "parameters": 73856,
+      "macs": 3612672
+    },
+    {
+      "name": "global_average_pool",
+      "type": "GlobalAveragePooling2D",
+      "output_shape": [
+        null,
+        128
+      ],
+      "parameters": 0,
+      "macs": 0
+    },
+    {
+      "name": "dense64_relu",
+      "type": "Dense",
+      "output_shape": [
+        null,
+        64
+      ],
+      "parameters": 8256,
+      "macs": 8192
+    },
+    {
+      "name": "class_probabilities",
+      "type": "Dense",
+      "output_shape": [
+        null,
+        10
+      ],
+      "parameters": 650,
+      "macs": 640
+    }
+  ]
+}

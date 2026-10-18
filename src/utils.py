@@ -23,7 +23,18 @@ def count_macs(model: tf.keras.Model) -> tuple[int, list[dict[str, Any]]]:
         macs = 0
         output_shape = layer.output.shape
 
-        if isinstance(layer, tf.keras.layers.Conv2D):
+        # SeparableConv2D is not a Conv2D subclass in Keras 3, so it needs its own branch:
+        # depthwise k*k per input channel, then a 1x1 pointwise mix to the output channels.
+        if isinstance(layer, tf.keras.layers.SeparableConv2D):
+            height = _shape_dimension(output_shape[1])
+            width = _shape_dimension(output_shape[2])
+            input_channels = _shape_dimension(layer.input.shape[-1])
+            kernel_height, kernel_width, _, _ = layer.depthwise_kernel.shape
+            output_channels = int(layer.pointwise_kernel.shape[-1])
+            macs = height * width * (
+                int(kernel_height) * int(kernel_width) * input_channels + input_channels * output_channels
+            )
+        elif isinstance(layer, tf.keras.layers.Conv2D):
             height = _shape_dimension(output_shape[1])
             width = _shape_dimension(output_shape[2])
             input_channels = _shape_dimension(layer.input.shape[-1])

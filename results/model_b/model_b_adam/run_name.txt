@@ -1,0 +1,1 @@
+model_b_adam_lr0.004_bs128_e20
