@@ -1,0 +1,10 @@
+{
+  "split": "validation",
+  "images": 10500,
+  "validation_loss": 0.2419579178094864,
+  "validation_accuracy": 0.9145714285714286,
+  "macro_precision": 0.9152131537680634,
+  "macro_recall": 0.9145714285714286,
+  "macro_f1": 0.9147247409179148,
+  "weighted_f1": 0.9147247409179148
+}
