@@ -25,6 +25,10 @@ FINE_TUNE_FRACTION = 0.3   # Target 30% of all backbone layers, skipping BatchNo
 DROPOUT = 0.2
 HEAD_PATIENCE = 3
 FINE_TUNE_PATIENCE = 5
+# Stage 2: halve the learning rate after two epochs without better val_loss.
+FINE_TUNE_LR_REDUCTION_FACTOR = 0.5
+FINE_TUNE_LR_REDUCTION_PATIENCE = 2
+FINE_TUNE_MIN_LEARNING_RATE = 1e-6
 ALPHA = 1.0                # Keep the standard MobileNetV2 width for the baseline.
 
 # Each SOTA model must keep its own figures, metrics, logs, and checkpoints.
@@ -69,6 +73,12 @@ def main():
         "head_learning_rate": HEAD_LEARNING_RATE,
         "fine_tune_learning_rate": FINE_TUNE_LEARNING_RATE,
         "head_patience": HEAD_PATIENCE, "fine_tune_patience": FINE_TUNE_PATIENCE,
+        "fine_tune_lr_reduction": {
+            "monitor": "val_loss", "mode": "min",
+            "factor": FINE_TUNE_LR_REDUCTION_FACTOR,
+            "patience": FINE_TUNE_LR_REDUCTION_PATIENCE,
+            "min_lr": FINE_TUNE_MIN_LEARNING_RATE,
+        },
         "fine_tune_fraction": FINE_TUNE_FRACTION, "dropout": DROPOUT, "alpha": ALPHA,
         "batchnorm_frozen": True, "augmentation": False,
         "selection_metric": "validation_loss", "preprocessing": "Rescaling to [-1, 1] inside model",
@@ -245,6 +255,16 @@ def main():
                 str(OUTPUT_DIR / "mobilenetv2_finetuned_best.keras"),
                 monitor="val_loss",
                 save_best_only=True,
+            ),
+            # Try smaller steps before EarlyStopping's five-epoch wait runs out.
+            # Example: 1e-5 -> 5e-6 -> 2.5e-6, with a minimum of 1e-6.
+            keras.callbacks.ReduceLROnPlateau(
+                monitor="val_loss",
+                mode="min",
+                factor=FINE_TUNE_LR_REDUCTION_FACTOR,
+                patience=FINE_TUNE_LR_REDUCTION_PATIENCE,
+                min_lr=FINE_TUNE_MIN_LEARNING_RATE,
+                verbose=1,
             ),
             keras.callbacks.EarlyStopping(
                 monitor="val_loss",
