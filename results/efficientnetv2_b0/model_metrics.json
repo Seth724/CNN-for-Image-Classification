@@ -1,0 +1,14 @@
+{
+  "total_parameters": 5932122,
+  "trainable_parameters": 4653842,
+  "non_trainable_parameters": 1278280,
+  "training_checkpoint_size_mib": 59.09279155731201,
+  "inference_model_size_mib": 23.528961181640625,
+  "weight_data_size_mib": 22.629249572753906,
+  "flops_per_image": 120901807,
+  "mflops_per_image": 120.901807,
+  "estimated_macs_per_image": 60450903,
+  "cpu_inference_median_ms_per_image_batch1": 10.958340500110353,
+  "cpu_latency_warmup_runs": 10,
+  "cpu_latency_measured_runs": 100
+}
