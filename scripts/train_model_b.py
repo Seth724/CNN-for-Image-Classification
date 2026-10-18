@@ -7,7 +7,13 @@ Each run writes to its own --output-dir:
 
 On top of Model A's fields, evaluation.json records total_parameters, total_macs,
 final/best validation accuracy (pick configurations on these, not on test accuracy)
-and CPU latency for the Q6 comparison.
+and CPU latency. metrics/reporting_metrics.json holds the shared Q6 measurements
+(model_reporting_metrics: inference size, profiler MACs, CPU latency).
+
+Q6 (inputs matched to the pretrained models): --input-size 64 upscales with the same
+tf.image.resize as the SOTA loader (1 channel, 0-1), and --best-checkpoint evaluates the
+epoch with the lowest validation loss, as the SOTA scripts do. The defaults (28x28,
+final epoch) reproduce the Q4 runs.
 """
 import argparse
 import csv
@@ -25,8 +31,9 @@ import tensorflow as tf
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.data_loader import make_tf_datasets
-from src.evaluation import EpochTimer, evaluate_classifier, measure_cpu_latency_ms, plot_history
+from src.data_loader import make_tf_datasets, make_upscaled_grayscale_datasets
+from src.evaluation import (EpochTimer, evaluate_classifier, measure_cpu_latency_ms,
+                            model_reporting_metrics, plot_history)
 from src.models.model_b import build_model_b
 from src.utils import architecture_metrics, save_json
 
@@ -53,6 +60,10 @@ def parse_args():
         default=0.9,
         help="Momentum coefficient for sgd_momentum.",
     )
+    parser.add_argument("--input-size", type=int, default=28,
+                        help="28 = native Fashion-MNIST; 64 = upscaled like the pretrained models' input.")
+    parser.add_argument("--best-checkpoint", action="store_true",
+                        help="Evaluate the epoch with the lowest validation loss instead of the final epoch.")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results" / "model_b")
     return parser.parse_args()
 
@@ -82,12 +93,17 @@ def main():
     metrics_dir.mkdir(parents=True, exist_ok=True)
     models_dir.mkdir(parents=True, exist_ok=True)
 
-    model = build_model_b()
+    size = args.input_size
+    model = build_model_b(input_shape=(size, size, 1))
     architecture = architecture_metrics(model)
     save_json(architecture, metrics_dir / "architecture.json")
     model.summary()
 
-    train_ds, val_ds, test_ds = make_tf_datasets(batch_size=args.batch_size)
+    if size == 28:
+        train_ds, val_ds, test_ds = make_tf_datasets(batch_size=args.batch_size)
+    else:
+        train_ds, val_ds, test_ds = make_upscaled_grayscale_datasets(
+            batch_size=args.batch_size, size=size, shuffle_seed=args.seed)
     optimizer, learning_rate = build_optimizer(args.optimizer, args.learning_rate, args.momentum)
     model.compile(
         optimizer=optimizer,
@@ -96,19 +112,31 @@ def main():
     )
     training_start = time.perf_counter()
     epoch_timer = EpochTimer()
+    callbacks = [epoch_timer]
+    best_path = models_dir / "model_b_best.keras"
+    if args.best_checkpoint:
+        # Same selection rule as the SOTA scripts: lowest validation loss.
+        callbacks.append(tf.keras.callbacks.ModelCheckpoint(best_path, monitor="val_loss", save_best_only=True))
     history = model.fit(
         train_ds,
         validation_data=val_ds,
         epochs=args.epochs,
         shuffle=False,
-        callbacks=[epoch_timer],
+        callbacks=callbacks,
     )
     training_seconds = time.perf_counter() - training_start
 
-    # Like Model A, the model after the final epoch is saved and evaluated.
+    # By default, like Model A, the model after the final epoch is saved and evaluated.
     model_path = models_dir / "model_b.keras"
     model.save(model_path)
-    model_size_kb = os.path.getsize(model_path) / 1024
+    if args.best_checkpoint:
+        training_checkpoint = best_path
+        model = tf.keras.models.load_model(best_path)
+        selected_epoch = int(np.argmin(history.history["val_loss"])) + 1
+    else:
+        training_checkpoint = model_path
+        selected_epoch = args.epochs
+    model_size_kb = os.path.getsize(training_checkpoint) / 1024
     steady_epoch_times = epoch_timer.epoch_times[1:] or epoch_timer.epoch_times
     evaluation_start = time.perf_counter()
     test_loss, test_accuracy = model.evaluate(test_ds, verbose=0)
@@ -123,6 +151,14 @@ def main():
         title="Model B confusion matrix",
     )
     evaluation_seconds = time.perf_counter() - evaluation_start
+
+    # Shared Q6 measurements, taken exactly as the SOTA scripts take them: an inference
+    # copy saved without optimizer state, profiler MACs and CPU latency.
+    inference_model = tf.keras.models.load_model(training_checkpoint, compile=False)
+    inference_path = models_dir / "model_b_inference.keras"
+    inference_model.save(inference_path)
+    reporting = model_reporting_metrics(inference_model, training_checkpoint, inference_path)
+    save_json(reporting, metrics_dir / "reporting_metrics.json")
     plot_history(history.history, output_dir / "figures")
 
     with (metrics_dir / "history.csv").open("w", newline="", encoding="utf-8") as file:
@@ -136,6 +172,9 @@ def main():
     evaluation.update(
         {
             "model": "model_b",
+            "input_size": size,
+            "checkpoint": "best_val_loss" if args.best_checkpoint else "final_epoch",
+            "selected_epoch": selected_epoch,
             "epochs": args.epochs,
             "batch_size": args.batch_size,
             "optimizer": args.optimizer,
@@ -161,10 +200,12 @@ def main():
             "total_run_seconds": round(time.perf_counter() - total_start, 3),
         }
     )
+    evaluation["reporting"] = reporting
     (metrics_dir / "evaluation.json").write_text(json.dumps(evaluation, indent=2), encoding="utf-8")
     print(f"Saved model and metrics under: {output_dir}")
     print(f"Training time: {training_seconds:.2f} seconds")
     print(f"Final validation accuracy: {val_accuracy[-1]:.4f}")
+    print(f"Evaluated epoch: {selected_epoch} ({'best validation loss' if args.best_checkpoint else 'final'})")
     print(f"Test accuracy: {test_accuracy:.4f}")
 
 

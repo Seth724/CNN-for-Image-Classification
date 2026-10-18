@@ -39,6 +39,31 @@ def make_tf_datasets(batch_size=128, sota=False, size=32, shuffle_seed=42):
     return train_ds, val_ds, test_ds
 
 
+def make_upscaled_grayscale_datasets(batch_size=128, size=64, shuffle_seed=42):
+    """Custom-CNN input upscaled to size x size, matching the pretrained-model images.
+
+    Uses the same per-batch tf.image.resize (bilinear) as make_sota_datasets_streaming,
+    but keeps one channel and scales to 0-1. Because the resize is linear, these images
+    equal the SOTA images' first channel divided by 255.
+    """
+    x_train, y_train, x_val, y_val, x_test, y_test = _raw()
+
+    def convert(images, labels):
+        images = tf.cast(images[..., None], tf.float32)
+        images = tf.image.resize(images, (size, size))
+        return images / 255.0, labels
+
+    def build(images, labels, training=False):
+        ds = tf.data.Dataset.from_tensor_slices((images, labels))
+        if training:
+            ds = ds.shuffle(len(images), seed=shuffle_seed, reshuffle_each_iteration=True)
+        return (ds.batch(batch_size)
+                .map(convert, num_parallel_calls=tf.data.AUTOTUNE)
+                .prefetch(tf.data.AUTOTUNE))
+
+    return build(x_train, y_train, True), build(x_val, y_val), build(x_test, y_test)
+
+
 def make_sota_datasets_streaming(batch_size=32, size=32, shuffle_seed=42):
     """Resize raw images per batch, preserving 0–255 pixels for model preprocessing.
 
