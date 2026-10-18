@@ -20,7 +20,7 @@ SEED = 42
 HEAD_EPOCHS = 10
 FINE_TUNE_EPOCHS = 30
 HEAD_LEARNING_RATE = 1e-3
-FINE_TUNE_LEARNING_RATE = 1e-5
+FINE_TUNE_LEARNING_RATE = 5e-6
 FINE_TUNE_FRACTION = 0.3   # Target 30% of all backbone layers, skipping BatchNorm.
 DROPOUT = 0.2
 HEAD_PATIENCE = 3
@@ -257,7 +257,7 @@ def main():
                 save_best_only=True,
             ),
             # Try smaller steps before EarlyStopping's five-epoch wait runs out.
-            # Example: 1e-5 -> 5e-6 -> 2.5e-6, with a minimum of 1e-6.
+            # Example: 5e-6 -> 2.5e-6 -> 1.25e-6, with a minimum of 1e-6.
             keras.callbacks.ReduceLROnPlateau(
                 monitor="val_loss",
                 mode="min",
