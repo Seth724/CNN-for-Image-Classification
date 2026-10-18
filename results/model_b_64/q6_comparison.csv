@@ -1,0 +1,5 @@
+model,input,test_accuracy,macro_f1,total_parameters,weight_data_kib,inference_file_kib,macs_profiler,mflops,cpu_latency_ms,accuracy_source,params_vs_B64,macs_vs_B64,latency_vs_B64
+"Model B (28x28, native)",28x28x1,0.9082857370376587,0.9069276731755253,20522,80.2,116.6,1166078,2.33,1.054,"results/model_b/model_b_rmsprop (Q4, final epoch)",1.0,0.2,0.5
+"Model B (64x64, upscaled)",64x64x1,0.9207618832588196,0.9204738149316155,20522,80.2,116.6,6054590,12.11,1.956,model_b64_rmsprop_lr0.003_bs128_e60 (best validation-loss epoch 49),1.0,1.0,1.0
+MobileNetV2 (64x64),64x64x3,,,2270794,8870.3,9442.7,25081342,50.16,4.955,not available at 64x64 yet,110.7,4.1,2.5
+EfficientNetV2-B0 (64x64),64x64x3,,,5932122,23172.4,24103.3,60450903,120.9,9.331,not available at 64x64 yet,289.1,10.0,4.8

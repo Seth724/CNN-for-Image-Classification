@@ -1,0 +1,4 @@
+run,selected_epoch,best_val_accuracy,test_accuracy (report only),params,macs_formula,macs_profiler,inference_size_kib,epoch_time_s
+model_b64_rmsprop_lr0.003_bs128_e60,49,0.9127,0.9208,20522,5825152,6054590,116.3,6.064
+model_b64_rmsprop_lr0.002_bs128_e60,59,0.9047,0.9166,20522,5825152,6054590,116.3,6.385
+model_b64_rmsprop_lr0.001_bs128_e60,53,0.887,0.9002,20522,5825152,6054590,116.3,6.146
