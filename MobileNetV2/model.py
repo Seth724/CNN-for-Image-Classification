@@ -20,12 +20,13 @@ SEED = 42
 HEAD_EPOCHS = 10
 FINE_TUNE_EPOCHS = 30
 HEAD_LEARNING_RATE = 1e-3
-FINE_TUNE_LEARNING_RATE = 5e-6
-FINE_TUNE_FRACTION = 0.35  # Target 35% of all backbone layers, skipping BatchNorm.
+FINE_TUNE_LEARNING_RATE = 1e-5  # Fixed rate, matching the selected Run 8 setup.
+FINE_TUNE_FRACTION = 0.3   # Target 30% of all backbone layers, skipping BatchNorm.
 DROPOUT = 0.2
 HEAD_PATIENCE = 3
 FINE_TUNE_PATIENCE = 5
-# Stage 2: halve the learning rate after two epochs without better val_loss.
+# False keeps Run 8's fixed rate. Set True to try automatic LR reduction again.
+ENABLE_LR_REDUCTION = False
 FINE_TUNE_LR_REDUCTION_FACTOR = 0.5
 FINE_TUNE_LR_REDUCTION_PATIENCE = 2
 FINE_TUNE_MIN_LEARNING_RATE = 1e-6
@@ -74,6 +75,7 @@ def main():
         "fine_tune_learning_rate": FINE_TUNE_LEARNING_RATE,
         "head_patience": HEAD_PATIENCE, "fine_tune_patience": FINE_TUNE_PATIENCE,
         "fine_tune_lr_reduction": {
+            "enabled": ENABLE_LR_REDUCTION,
             "monitor": "val_loss", "mode": "min",
             "factor": FINE_TUNE_LR_REDUCTION_FACTOR,
             "patience": FINE_TUNE_LR_REDUCTION_PATIENCE,
@@ -201,7 +203,7 @@ def main():
     # Set the backbone trainable, then calculate the target from ALL layers:
     #   n_unfreeze = int(len(base_model.layers) * FINE_TUNE_FRACTION)
     # Fill that quota from the end, SKIPPING every BatchNormalization layer.
-    # MobileNet: int(154 * 0.35) = 53 non-BN layers marked trainable.
+    # MobileNet: int(154 * 0.3) = 46 non-BN layers marked trainable.
     # Some layers (ReLU/Add/etc.) have no weights; report weight-bearing layers too.
     # Recompile after changing trainability, using the smaller fine-tuning rate.
     # Stage 2 continues from the best stage-1 weights, not from scratch.
@@ -245,33 +247,34 @@ def main():
     model.summary(show_trainable=True)
 
     fine_tune_timer = EpochTimer()
+    fine_tune_callbacks = [
+        fine_tune_timer,
+        keras.callbacks.ModelCheckpoint(
+            str(OUTPUT_DIR / "mobilenetv2_finetuned_best.keras"),
+            monitor="val_loss",
+            save_best_only=True,
+        ),
+    ]
+    # Keep the optional code available, but use it only when the flag is True.
+    if ENABLE_LR_REDUCTION:
+        fine_tune_callbacks.append(keras.callbacks.ReduceLROnPlateau(
+            monitor="val_loss",
+            mode="min",
+            factor=FINE_TUNE_LR_REDUCTION_FACTOR,
+            patience=FINE_TUNE_LR_REDUCTION_PATIENCE,
+            min_lr=FINE_TUNE_MIN_LEARNING_RATE,
+            verbose=1,
+        ))
+    fine_tune_callbacks.append(keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=FINE_TUNE_PATIENCE,
+        restore_best_weights=True,
+    ))
     fine_tune_history = model.fit(
         train_ds,
         epochs=FINE_TUNE_EPOCHS,
         validation_data=val_ds,
-        callbacks=[
-            fine_tune_timer,
-            keras.callbacks.ModelCheckpoint(
-                str(OUTPUT_DIR / "mobilenetv2_finetuned_best.keras"),
-                monitor="val_loss",
-                save_best_only=True,
-            ),
-            # Try smaller steps before EarlyStopping's five-epoch wait runs out.
-            # Example: 5e-6 -> 2.5e-6 -> 1.25e-6, with a minimum of 1e-6.
-            keras.callbacks.ReduceLROnPlateau(
-                monitor="val_loss",
-                mode="min",
-                factor=FINE_TUNE_LR_REDUCTION_FACTOR,
-                patience=FINE_TUNE_LR_REDUCTION_PATIENCE,
-                min_lr=FINE_TUNE_MIN_LEARNING_RATE,
-                verbose=1,
-            ),
-            keras.callbacks.EarlyStopping(
-                monitor="val_loss",
-                patience=FINE_TUNE_PATIENCE,
-                restore_best_weights=True,
-            ),
-        ],
+        callbacks=fine_tune_callbacks,
     )
 
     fine_checkpoint = OUTPUT_DIR / "mobilenetv2_finetuned_best.keras"
