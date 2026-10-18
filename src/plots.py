@@ -74,7 +74,8 @@ def plot_confusion_matrix(y_true, y_pred, class_names, out_dir, title):
     n = len(class_names)
     cm = np.zeros((n, n), dtype=int)
     np.add.at(cm, (y_true, y_pred), 1)
-    norm = cm / cm.sum(axis=1, keepdims=True)
+    counts = cm.sum(axis=1, keepdims=True)
+    norm = np.divide(cm, counts, out=np.zeros_like(cm, dtype=float), where=counts > 0)
 
     fig, ax = plt.subplots(figsize=(8, 7))
     im = ax.imshow(norm, cmap="Blues", vmin=0, vmax=1)
@@ -166,9 +167,11 @@ def plot_full_training_curve(history_transfer, history_finetune, out_dir):
     _save(fig, os.path.join(out_dir, "full_training_curve.png"))
 
 
-def plot_metric_comparison(transfer_metrics, finetuned_metrics, out_dir):
-    """Test accuracy / macro precision / macro recall, transfer vs fine-tuned."""
-    keys = [("test_accuracy", "Accuracy"), ("macro_precision", "Macro precision"),
+def plot_metric_comparison(transfer_metrics, finetuned_metrics, out_dir, split="test"):
+    """Compare both stages on the explicitly supplied reporting split."""
+    if split not in {"validation", "test"}:
+        raise ValueError("Comparison split must be validation or test")
+    keys = [(f"{split}_accuracy", "Accuracy"), ("macro_precision", "Macro precision"),
             ("macro_recall", "Macro recall")]
     x = np.arange(len(keys))
     w = 0.36
@@ -183,7 +186,7 @@ def plot_metric_comparison(transfer_metrics, finetuned_metrics, out_dir):
     lo = min(t + f)
     ax.set_ylim(max(0, lo - 0.05), 1.0)  # zoomed axis: differences are small, note this in the report
     ax.set_ylabel("Score (y-axis truncated)")
-    ax.set_title("Test-set performance")
+    ax.set_title(f"{split.capitalize()}-set performance")
     ax.grid(axis="y", alpha=0.3)
     ax.legend(loc="lower right")
     _save(fig, os.path.join(out_dir, "metric_comparison.png"))
@@ -208,8 +211,10 @@ def plot_per_class_comparison(y_true, pred_transfer, pred_finetuned, class_names
     _save(fig, os.path.join(out_dir, "per_class_f1_comparison.png"))
 
 
-def plot_efficiency_table(transfer_metrics, finetuned_metrics, out_dir):
+def plot_efficiency_table(transfer_metrics, finetuned_metrics, out_dir, split="test"):
     """Table figure (params, size, FLOPs, epoch time, metrics) ready to paste into a report."""
+    if split not in {"validation", "test"}:
+        raise ValueError("Table split must be validation or test")
     rows = [
         ("Total parameters", "total_parameters", "{:,}"),
         ("Trainable parameters", "trainable_parameters", "{:,}"),
@@ -220,6 +225,19 @@ def plot_efficiency_table(transfer_metrics, finetuned_metrics, out_dir):
         ("Macro precision", "macro_precision", "{:.4f}"),
         ("Macro recall", "macro_recall", "{:.4f}"),
     ]
+    if split == "validation":
+        # Training checkpoints include optimizer state; label that size explicitly.
+        # FLOPs/CPU timing are reported separately for the selected final model.
+        rows = [
+            ("Total parameters", "total_parameters", "{:,}"),
+            ("Trainable parameters", "trainable_parameters", "{:,}"),
+            ("Training checkpoint (MiB)", "training_checkpoint_size_mib", "{:.2f}"),
+            ("Median epoch time (s)", "median_epoch_time_s", "{:.2f}"),
+            ("Validation accuracy", "validation_accuracy", "{:.4f}"),
+            ("Macro precision", "macro_precision", "{:.4f}"),
+            ("Macro recall", "macro_recall", "{:.4f}"),
+            ("Macro F1", "macro_f1", "{:.4f}"),
+        ]
     def display(value, fmt):
         return "N/A" if value is None else fmt.format(value)
 
