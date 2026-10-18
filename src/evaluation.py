@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import tempfile
@@ -30,7 +31,11 @@ class EpochTimer(keras.callbacks.Callback):
 
 
 def model_size_mb(model):
-    """Size of the model saved to disk (.keras) in MB."""
+    """Legacy checkpoint size in MiB; a compiled model includes optimizer state.
+
+    New SOTA reports use model_reporting_metrics to distinguish training
+    checkpoints from optimizer-free inference files.
+    """
     with tempfile.TemporaryDirectory() as d:
         path = os.path.join(d, "model.keras")
         model.save(path)
@@ -137,11 +142,110 @@ def macro_precision_recall(y_true, y_pred, num_classes):
     return float(precision.mean()), float(recall.mean())
 
 
+def predict_probabilities(model, ds):
+    """Collect matching labels and probabilities in ONE prediction pass."""
+    labels, probabilities = [], []
+    for images, batch_labels in ds:
+        probabilities.append(model(images, training=False).numpy())
+        labels.append(batch_labels.numpy())
+    if not labels:
+        raise ValueError("Cannot evaluate an empty dataset")
+    return np.concatenate(labels).astype(int), np.concatenate(probabilities)
+
+
 def predict_labels(model, ds):
-    """Return (y_true, y_pred) for an unshuffled dataset such as test_ds."""
-    y_true = np.concatenate([y.numpy() for _, y in ds]).astype(int)
-    y_pred = np.argmax(model.predict(ds, verbose=0), axis=1)
-    return y_true, y_pred
+    """Return matching labels and predicted classes from one dataset pass."""
+    labels, probabilities = predict_probabilities(model, ds)
+    return labels, np.argmax(probabilities, axis=1)
+
+
+def model_reporting_metrics(model, training_checkpoint, inference_file):
+    """Use the same size, computation and CPU timing measures for both SOTAs.
+
+    inference_file must have been saved from a model loaded with compile=False.
+    Keep the original compiled checkpoint for resuming training. MiB is always
+    bytes / 1024**2; neither file size is the model's peak runtime RAM usage.
+    """
+    flops = estimate_flops(model)
+    try:
+        latency = measure_cpu_latency_ms(model)
+    except Exception as error:
+        print(f"CPU latency measurement unavailable: {error}")
+        latency = None
+    total = int(model.count_params())
+    trainable = int(sum(np.prod(weight.shape) for weight in model.trainable_weights))
+    return {
+        "total_parameters": total,
+        "trainable_parameters": trainable,
+        "non_trainable_parameters": total - trainable,
+        "training_checkpoint_size_mib": Path(training_checkpoint).stat().st_size / 1024**2,
+        "inference_model_size_mib": Path(inference_file).stat().st_size / 1024**2,
+        "weight_data_size_mib": sum(weight.numpy().nbytes for weight in model.weights) / 1024**2,
+        "flops_per_image": flops,
+        "mflops_per_image": flops / 1e6 if flops is not None else None,
+        "estimated_macs_per_image": estimate_macs(model, flops=flops),
+        "cpu_inference_median_ms_per_image_batch1": latency,
+        "cpu_latency_warmup_runs": 10,
+        "cpu_latency_measured_runs": 100,
+    }
+
+
+def dataset_digest(path):
+    """Record which processed split file a run used, for consistent final testing."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as file:
+        for block in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def save_classification_report(model, dataset, class_names, output_dir, split,
+                               return_predictions=False):
+    """Save scores/plots from one pass; optionally return labels/predictions too.
+
+    Returning predictions lets stage-comparison plots reuse the same pass.
+    The normal return value remains (metrics, class_report, confusion_matrix).
+    """
+    import csv
+    from src import plots
+    from src.utils import save_json
+
+    if split not in {"validation", "test"}:
+        raise ValueError("Reporting split must be validation or test")
+    labels, probabilities = predict_probabilities(model, dataset)
+    if probabilities.shape[1] != len(class_names):
+        raise ValueError("Model outputs do not match the supplied class names")
+    predictions = probabilities.argmax(axis=1)
+    confusion = np.zeros((len(class_names), len(class_names)), dtype=np.int64)
+    np.add.at(confusion, (labels, predictions), 1)
+    scores = _classification_metrics(confusion)
+    per_class = scores.pop("per_class")
+    metrics = {
+        "split": split, "images": int(len(labels)),
+        f"{split}_loss": float(keras.losses.SparseCategoricalCrossentropy()(labels, probabilities).numpy()),
+        f"{split}_accuracy": float(np.mean(labels == predictions)),
+        **scores,
+    }
+    report = {
+        name: {"precision": item["precision"], "recall": item["recall"],
+               "f1": item["f1_score"], "support": item["support"]}
+        for name, item in zip(class_names, per_class)
+    }
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    save_json(metrics, out / f"{split}_metrics.json")
+    save_json(report, out / f"{split}_classification_report.json")
+    np.savetxt(out / f"{split}_confusion_matrix.csv", confusion, delimiter=",", fmt="%d")
+    with (out / f"{split}_confusion_matrix_labeled.csv").open("w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["True / Predicted", *class_names])
+        for name, row in zip(class_names, confusion):
+            writer.writerow([name, *row.tolist()])
+    plots.plot_confusion_matrix(labels, predictions, class_names, str(out / "figures"), f"{split} confusion matrix")
+    plots.plot_per_class_metrics(labels, predictions, class_names, str(out / "figures"), f"{split} scores by class")
+    if return_predictions:
+        return metrics, report, confusion, labels, predictions
+    return metrics, report, confusion
 
 
 def collect_metrics(model, test_ds, timer, num_classes=10, save_path=None):
