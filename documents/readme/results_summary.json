@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Model A",
+    "kind": "Custom · 28×28",
+    "accuracy": 91.84761643409729,
+    "f1": 91.76886043047932,
+    "parameters": 101578,
+    "weights": 0.406312,
+    "inference": null,
+    "source": "results/model_a/model_a_adam/evaluation.json",
+    "color": "#6366f1"
+  },
+  {
+    "name": "Model B · 28×28",
+    "kind": "Custom · native input",
+    "accuracy": 90.82857370376587,
+    "f1": 90.69276731755252,
+    "parameters": 20522,
+    "weights": 0.082088,
+    "inference": null,
+    "source": "results/model_b/model_b_rmsprop/evaluation.json",
+    "color": "#0f766e"
+  },
+  {
+    "name": "Model B · 64×64",
+    "kind": "Custom · upscaled input",
+    "accuracy": 92.07618832588196,
+    "f1": 92.04738149316155,
+    "parameters": 20522,
+    "weights": 0.082088,
+    "inference": 0.119104,
+    "source": "results/model_b_64/selected/evaluation.json",
+    "color": "#10b981"
+  },
+  {
+    "name": "MobileNetV2",
+    "kind": "ImageNet · 64×64",
+    "accuracy": 92.00952380952381,
+    "f1": 91.99801243738553,
+    "parameters": 2270794,
+    "weights": 9.083176,
+    "inference": 9.663617,
+    "source": "results/mobilenetV2/final_test/run_20261018_205323Z_p3hawh7e/metrics.json",
+    "color": "#f59e0b"
+  },
+  {
+    "name": "EfficientNetV2-B0",
+    "kind": "ImageNet · 64×64",
+    "accuracy": 92.80952380952381,
+    "f1": 92.79101723857998,
+    "parameters": 5932122,
+    "weights": 23.728488,
+    "inference": 24.671903999999998,
+    "source": "results/efficientnetv2_b0/final_test/metrics.json",
+    "color": "#2563eb"
+  }
+]
